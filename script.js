@@ -1,5 +1,50 @@
 // Interactive JavaScript for Portfolio
 
+// Global notification function
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Email notification function
+function sendEmail(type, data) {
+    const templateParams = {
+        type: type,
+        to_email: 'orzz4237@gmail.com',
+        ...data
+    };
+
+    // Add delay to avoid rate limiting
+    setTimeout(() => {
+        emailjs.send('service_22m6rq4', 'template_xr1auon', templateParams)
+            .then(function(response) {
+                console.log('Email sent successfully!', response.status);
+            }, function(error) {
+                console.log('Failed to send email:', error);
+            });
+    }, 1000);
+}
+
+// Initialize EmailJS
+(function() {
+    emailjs.init("JCx0Y4IfVKzT6E55e");
+})();
+
 // Smooth scroll behavior for navigation links
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize animations and interactions
@@ -701,48 +746,6 @@ class ShoppingCart {
             }, 300);
         }, 3000);
     }
-}
-
-// Initialize EmailJS
-(function() {
-    emailjs.init("JCx0Y4IfVKzT6E55e");
-})();
-
-// Email notification function
-function sendEmail(type, data) {
-    const templateParams = {
-        type: type,
-        to_email: 'orzz4237@gmail.com',
-        ...data
-    };
-
-    emailjs.send('service_22m6rq4', 'template_xr1auon', templateParams)
-        .then(function(response) {
-            console.log('Email sent successfully!', response.status);
-        }, function(error) {
-            console.log('Failed to send email:', error);
-        });
-}
-
-// Global notification function
-function showNotification(message, type) {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}"></i>
-        <span>${message}</span>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        setTimeout(() => {
-            if (document.body.contains(notification)) {
-                document.body.removeChild(notification);
-            }
-        }, 300);
-    }, 3000);
 }
 
 // Initialize everything when DOM is loaded
