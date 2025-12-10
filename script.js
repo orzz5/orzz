@@ -110,13 +110,13 @@ function initForms() {
             // Show success message
             showNotification('Suggestion submitted successfully! We\'ll review it soon.', 'success');
             
-            // Reset form
-            document.getElementById('suggestionForm').reset();
+            // Hide form and show success message
+            suggestionForm.style.display = 'none';
+            suggestionSuccess.style.display = 'block';
+            
             // Reset form after delay
             setTimeout(() => {
                 suggestionForm.reset();
-                nameGroup.style.display = 'flex';
-                nameInput.setAttribute('required', '');
                 suggestionForm.style.display = 'flex';
                 suggestionSuccess.style.display = 'none';
             }, 5000);
