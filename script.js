@@ -115,6 +115,7 @@ function initForms() {
             });
             
             // Show success message
+            showNotification('Custom order submitted successfully! We\'ll review it soon.', 'success');
             customOrderForm.style.display = 'none';
             orderSuccess.style.display = 'block';
             
@@ -721,6 +722,27 @@ function sendEmail(type, data) {
         }, function(error) {
             console.log('Failed to send email:', error);
         });
+}
+
+// Global notification function
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
 }
 
 // Initialize everything when DOM is loaded

@@ -9,7 +9,7 @@ class AdminDashboard {
             lastSync: null,
             version: '1.0'
         };
-        this.init();
+        // Don't initialize here, wait for explicit init
     }
 
     init() {
@@ -504,5 +504,9 @@ class AdminDashboard {
 const dashboard = new AdminDashboard();
 window.dashboard = dashboard;
 
-// Always initialize dashboard
-dashboard.init();
+// Only initialize if we're on the admin dashboard page
+if (window.location.pathname.includes('adm-orrzz') || window.location.href.includes('adm-orrzz')) {
+    document.addEventListener('DOMContentLoaded', function() {
+        dashboard.init();
+    });
+}
