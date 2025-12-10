@@ -60,6 +60,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Form Handling
 function initForms() {
+    // Prevent duplicate submissions
+    let isSubmitting = false;
+    
     // Anonymous checkbox functionality
     const anonymousCheckbox = document.getElementById('anonymous-suggestion');
     const nameGroup = document.getElementById('name-group');
@@ -85,6 +88,10 @@ function initForms() {
     if (suggestionForm) {
         suggestionForm.addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // Prevent duplicate submissions
+            if (isSubmitting) return;
+            isSubmitting = true;
             
             const formData = {
                 name: document.getElementById('suggestion-name').value,
@@ -119,6 +126,7 @@ function initForms() {
                 suggestionForm.reset();
                 suggestionForm.style.display = 'flex';
                 suggestionSuccess.style.display = 'none';
+                isSubmitting = false; // Reset flag
             }, 5000);
         });
     }
@@ -130,6 +138,10 @@ function initForms() {
     if (customOrderForm) {
         customOrderForm.addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // Prevent duplicate submissions
+            if (isSubmitting) return;
+            isSubmitting = true;
             
             // Get form data
             const orderData = {
@@ -169,6 +181,7 @@ function initForms() {
                 customOrderForm.reset();
                 customOrderForm.style.display = 'flex';
                 orderSuccess.style.display = 'none';
+                isSubmitting = false; // Reset flag
             }, 5000);
         });
     }
