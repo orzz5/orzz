@@ -173,21 +173,25 @@
             let html = '';
             let total = 0;
             
-            cart.forEach(item => {
-                html += `
-                    <div class="cart-item">
-                        <div class="item-info">
-                            <h4>${item.service}</h4>
-                            <p>${item.description || 'Professional service'}</p>
+            if (cart.length === 0) {
+                html = '<p class="empty-cart">Your cart is empty</p>';
+            } else {
+                cart.forEach(item => {
+                    html += `
+                        <div class="cart-item">
+                            <div class="item-info">
+                                <h4>${item.service}</h4>
+                                <p>${item.description || 'Professional service'}</p>
+                            </div>
+                            <div class="item-price">$${item.price}</div>
                         </div>
-                        <div class="item-price">$${item.price}</div>
-                    </div>
-                `;
-                total += item.price;
-            });
+                    `;
+                    total += item.price;
+                });
+            }
             
             cartItems.innerHTML = html;
-            totalAmount.textContent = total;
+            totalAmount.textContent = total.toFixed(2);
         }
 
         // Handle payment submission
@@ -264,7 +268,7 @@
                 }
             } else {
                 // Handle PayPal payment
-                alert('PayPal payment coming soon!');
+                alert('PayPal payment will be available soon. Please use credit card for now.');
             }
         });
 
@@ -342,6 +346,15 @@
             background: #f8f9fa;
             border-radius: 8px;
             margin-bottom: 15px;
+        }
+
+        .empty-cart {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 40px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
         }
 
         .total {
