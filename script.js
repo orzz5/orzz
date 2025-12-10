@@ -715,7 +715,7 @@ function sendEmail(type, data) {
         ...data
     };
 
-    emailjs.send('service_22m6rq4', 'template_blpnnah', templateParams)
+    emailjs.send('service_22m6rq4', 'template_xr1auon', templateParams)
         .then(function(response) {
             console.log('Email sent successfully!', response.status);
         }, function(error) {
