@@ -713,31 +713,8 @@ class ShoppingCart {
             return;
         }
         
-        const total = this.calculateTotal();
-        const items = this.cart.map(item => `${item.service} ($${item.price})`).join(', ');
-        
-        if (confirm(`Confirm purchase of:\n${items}\n\nTotal: $${total}\n\nThis is a demo - no actual payment will be processed.`)) {
-            // Save order to localStorage for admin dashboard
-            const order = {
-                id: Date.now(),
-                items: this.cart,
-                total: total,
-                timestamp: new Date().toISOString(),
-                status: 'pending'
-            };
-            
-            // Save to orders (for admin dashboard)
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            orders.push(order);
-            localStorage.setItem('orders', JSON.stringify(orders));
-            
-            // Clear cart
-            this.cart = [];
-            this.saveCart();
-            this.closeCart();
-            
-            this.showNotification('Order confirmed! (Demo)', 'success');
-        }
+        // Redirect to checkout page
+        window.location.href = 'checkout.html';
     }
 
     showNotification(message, type) {
