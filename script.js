@@ -63,7 +63,7 @@ function initForms() {
             });
 
             // Show success message
-            this.showNotification('Suggestion submitted successfully! We\'ll review it soon.', 'success');
+            showNotification('Suggestion submitted successfully! We\'ll review it soon.', 'success');
             
             // Reset form
             document.getElementById('suggestionForm').reset();
@@ -90,15 +90,30 @@ function initForms() {
             const formData = new FormData(customOrderForm);
             const orderData = {
                 name: formData.get('name'),
-                service: formData.get('service'),
-                description: formData.get('description'),
-                deadline: formData.get('deadline'),
-                timestamp: new Date().toISOString()
+                email: formData.get('email'),
+                type: formData.get('service'),
+                details: formData.get('description'),
+                budget: formData.get('budget'),
+                timeline: formData.get('deadline'),
+                timestamp: Date.now()
             };
             
             // Store order
             console.log('Custom order submitted:', orderData);
-            localStorage.setItem('order_' + Date.now(), JSON.stringify(orderData));
+            const key = `order_${Date.now()}`;
+            localStorage.setItem(key, JSON.stringify(orderData));
+
+            // Send email notification
+            sendEmail('custom order', {
+                subject: `New ${orderData.type} Order from ${orderData.name}`,
+                name: orderData.name,
+                email: orderData.email,
+                type: orderData.type,
+                details: orderData.details,
+                budget: orderData.budget,
+                timeline: orderData.timeline,
+                timestamp: new Date(orderData.timestamp).toLocaleString()
+            });
             
             // Show success message
             customOrderForm.style.display = 'none';
