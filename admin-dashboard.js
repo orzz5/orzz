@@ -504,7 +504,5 @@ class AdminDashboard {
 const dashboard = new AdminDashboard();
 window.dashboard = dashboard;
 
-// Check if this is the admin dashboard page
-if (window.location.pathname.includes('adm-orrzz')) {
-    dashboard.init();
-}
+// Always initialize dashboard
+dashboard.init();

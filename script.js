@@ -42,11 +42,11 @@ function initForms() {
             e.preventDefault();
             
             const formData = {
-                name: document.getElementById('suggestionName').value,
-                email: document.getElementById('suggestionEmail').value,
-                type: document.getElementById('suggestionType').value,
-                message: document.getElementById('suggestionMessage').value,
-                anonymous: document.getElementById('suggestionAnonymous').checked,
+                name: document.getElementById('suggestion-name').value,
+                email: document.getElementById('suggestion-email').value || 'not_provided@suggestion.com',
+                type: document.getElementById('suggestion-type').value,
+                message: document.getElementById('suggestion-message').value,
+                anonymous: document.getElementById('anonymous-suggestion').checked,
                 timestamp: Date.now()
             };
 
@@ -87,14 +87,13 @@ function initForms() {
             e.preventDefault();
             
             // Get form data
-            const formData = new FormData(customOrderForm);
             const orderData = {
-                name: formData.get('name'),
-                email: formData.get('email'),
-                type: formData.get('service'),
-                details: formData.get('description'),
-                budget: formData.get('budget'),
-                timeline: formData.get('deadline'),
+                name: document.getElementById('order-name').value,
+                email: document.getElementById('order-email').value,
+                type: document.getElementById('order-service').value,
+                details: document.getElementById('order-description').value,
+                budget: document.getElementById('order-budget').value,
+                timeline: document.getElementById('order-deadline').value,
                 timestamp: Date.now()
             };
             
