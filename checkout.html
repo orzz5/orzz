@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - orzz</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo">
+                <span class="logo-text">oro</span>
+            </div>
+            <div class="nav-links">
+                <a href="/orzz/" class="nav-link">
+                    <i class="fas fa-home"></i> Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="checkout-container">
+        <div class="checkout-grid">
+            <!-- Left Column - Order Summary & Customer Info -->
+            <div class="checkout-left">
+                <!-- Order Summary -->
+                <div class="order-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
+                    </div>
+                    <div class="card-content">
+                        <div id="cart-items" class="cart-items"></div>
+                        <div class="order-total">
+                            <div class="total-row">
+                                <span>Total Amount:</span>
+                                <span class="total-amount">$<span id="total-amount">0.00</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Information -->
+                <div class="order-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-user"></i> Customer Information</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> Full Name</label>
+                            <input type="text" id="customer-name" class="form-input" placeholder="John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-envelope"></i> Email Address</label>
+                            <input type="email" id="customer-email" class="form-input" placeholder="john@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fab fa-discord"></i> Discord Username</label>
+                            <input type="text" id="customer-discord" class="form-input" placeholder="username#1234" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-map-marker-alt"></i> Location</label>
+                            <input type="text" id="customer-location" class="form-input" placeholder="City, Country">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-comment"></i> Project Details</label>
+                            <textarea id="customer-description" class="form-textarea" rows="3" placeholder="Tell us about your project..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Payment -->
+            <div class="checkout-right">
+                <div class="payment-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-credit-card"></i> Payment Method</h3>
+                    </div>
+                    <div class="card-content">
+                        <!-- Payment Options -->
+                        <div id="payment-options" class="payment-options">
+                            <div class="payment-option active" data-method="card">
+                                <div class="option-icon">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <div class="option-content">
+                                    <div class="option-title">Credit/Debit Card</div>
+                                    <div class="option-desc">Visa, Mastercard, Amex</div>
+                                </div>
+                                <div class="option-check">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="payment-option" data-method="paypal">
+                                <div class="option-icon">
+                                    <i class="fab fa-paypal"></i>
+                                </div>
+                                <div class="option-content">
+                                    <div class="option-title">PayPal</div>
+                                    <div class="option-desc">Fast & Secure</div>
+                                </div>
+                                <div class="option-check">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                            </div>
+                            
+                                                    </div>
+
+                        <!-- Payment Forms -->
+                        <div id="card-payment" class="payment-form active">
+                            <div class="form-group">
+                                <label>Card Information</label>
+                                <div id="card-element" class="stripe-card"></div>
+                            </div>
+                            <div id="card-errors" class="error-message"></div>
+                        </div>
+
+                        <div id="paypal-payment" class="payment-form">
+                            <div class="paypal-placeholder">
+                                <i class="fab fa-paypal fa-3x"></i>
+                                <p>PayPal payment coming soon!</p>
+                                <small>Please use credit card for now</small>
+                            </div>
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="form-group">
+                            <div class="terms-checkbox">
+                                <input type="checkbox" id="terms-accept" required>
+                                <label for="terms-accept">
+                                    I agree to the <a href="#terms-modal" class="terms-link">Terms of Service</a> and understand that this is a digital service purchase
+                                </label>
+                            </div>
+                        </div>
+
+                        
+                        <!-- Submit Button -->
+                        <button id="submit-payment" class="payment-btn">
+                            <i class="fas fa-lock"></i>
+                            <span>Complete Payment</span>
+                            <div class="btn-shine"></div>
+                        </button>
+
+                        <!-- Confirmation State -->
+                        <div id="payment-confirmation" class="confirmation-state" style="display: none;">
+                            <div class="confirmation-header">
+                                <h3><i class="fas fa-shield-alt"></i> Confirm Your Purchase</h3>
+                                <p>Please review your order details before completing the payment</p>
+                            </div>
+                            
+                            <div class="confirmation-content">
+                                <!-- Customer Info Summary -->
+                                <div class="confirmation-section">
+                                    <h4><i class="fas fa-user"></i> Customer Information</h4>
+                                    <div id="confirmation-customer-info"></div>
+                                </div>
+                                
+                                <!-- Order Summary -->
+                                <div class="confirmation-section">
+                                    <h4><i class="fas fa-shopping-bag"></i> Order Summary</h4>
+                                    <div id="confirmation-order-summary"></div>
+                                </div>
+                                
+                                <!-- Payment Method -->
+                                <div class="confirmation-section">
+                                    <h4><i class="fas fa-credit-card"></i> Payment Method</h4>
+                                    <div id="confirmation-payment-method">
+                                        <div class="payment-method-display">
+                                            <i class="fas fa-credit-card"></i>
+                                            <span>Credit/Debit Card</span>
+                                            <div class="card-preview">•••• •••• •••• 4242</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Total Amount -->
+                                <div class="confirmation-total">
+                                    <div class="total-row">
+                                        <span>Total Amount:</span>
+                                        <span class="total-amount" id="confirmation-total">$0.00</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="confirmation-actions">
+                                    <button id="cancel-purchase" class="btn btn-outline">
+                                        <i class="fas fa-arrow-left"></i> Back to Edit
+                                    </button>
+                                    <button id="confirm-purchase" class="btn btn-primary">
+                                        <i class="fas fa-lock"></i> Confirm Purchase - $<span id="confirm-total">0.00</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Animation State -->
+                        <div id="confirm-animation" class="confirm-animation-state" style="display: none;">
+                            <div class="confirm-animation-content">
+                                <div class="confirm-success-circle">
+                                    <div class="confirm-success-checkmark">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                </div>
+                                <h3>Purchase Confirmed!</h3>
+                                <p>Processing your payment securely...</p>
+                            </div>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="payment-loading" class="loading-state" style="display: none;">
+                            <div class="loading-spinner"></div>
+                            <p>Processing your payment...</p>
+                        </div>
+
+                        <!-- Success State -->
+                        <div id="payment-success" class="success-state" style="display: none;">
+                            <div class="success-animation">
+                                <div class="success-circle">
+                                    <div class="success-checkmark">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="success-content">
+                                <h2>Payment Successful!</h2>
+                                <p>Thank you for your order. We've received your payment and will start working on your project right away.</p>
+                                
+                                <div class="order-summary">
+                                    <h4>Order Summary</h4>
+                                    <div id="success-order-details"></div>
+                                </div>
+                                
+                                <div class="next-steps">
+                                    <h4>What's Next?</h4>
+                                    <ul>
+                                        <li><i class="fas fa-envelope"></i> You'll receive a confirmation email shortly</li>
+                                        <li><i class="fas fa-user"></i> We'll contact you within 24 hours</li>
+                                        <li><i class="fas fa-cog"></i> Your project will begin development</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="success-actions">
+                                    <a href="/orzz/" class="btn btn-primary">
+                                        <i class="fas fa-home"></i> Return
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms and Conditions Modal -->
+    <div id="terms-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Terms of Service</h3>
+                <button class="modal-close" onclick="closeTermsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h4>Service Agreement</h4>
+                <p>By purchasing our services, you agree to the following terms:</p>
+                
+                <ul>
+                    <li><strong>Service Delivery:</strong> Services will be delivered within the timeframe specified for each project type</li>
+                    <li><strong>Payment:</strong> All payments are final and non-refundable once work has begun</li>
+                    <li><strong>Communication:</strong> We will contact you within 24 hours to discuss project details</li>
+                    <li><strong>Revisions:</strong> Reasonable revisions are included based on project scope</li>
+                    <li><strong>Digital Services:</strong> All services are digital and delivered electronically</li>
+                    <li><strong>Timeline:</strong> Project timelines are estimates and may vary based on complexity</li>
+                </ul>
+                
+                <h4>Refund Policy</h4>
+                <p>Refunds are only available if work has not yet begun on your project. Once development starts, all sales are final.</p>
+                
+                <h4>Privacy</h4>
+                <p>Your information is kept confidential and will not be shared with third parties.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeTermsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize EmailJS
+        (function() {
+            emailjs.init("JCx0Y4IfVKzT6E55e");
+        })();
+
+        // Initialize Stripe
+        const stripe = Stripe('pk_test_51ScmpiCZKEedb0zi85rlU9jDH6Yv0b1A37fAMaUc2bCYFCs7MJeYycAihTfNDQMp36aqjrSekOkW88bCVrzCTs3u00NIwLIQBF');
+        const elements = stripe.elements();
+
+        // Create card element with custom styling
+        const card = elements.create('card', {
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#424770',
+                    fontFamily: 'Inter, sans-serif',
+                    '::placeholder': {
+                        color: '#aab7c4',
+                    },
+                },
+                invalid: {
+                    color: '#ef4444',
+                },
+            },
+        });
+
+        card.mount('#card-element');
+
+        // Handle card errors
+        card.addEventListener('change', ({error}) => {
+            const displayError = document.getElementById('card-errors');
+            if (error) {
+                displayError.textContent = error.message;
+            } else {
+                displayError.textContent = '';
+            }
+        });
+
+        // Payment method switching
+        // (Moved to DOMContentLoaded event above)
+
+        // Load cart from localStorage
+        function loadCart() {
+            const cart = JSON.parse(localStorage.getItem('shoppingCart') || '[]');
+            const cartItems = document.getElementById('cart-items');
+            const totalAmount = document.getElementById('total-amount');
+            
+            let html = '';
+            let total = 0;
+            
+            if (cart.length === 0) {
+                html = `
+                    <div class="empty-cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <p>Your cart is empty</p>
+                        <a href="index.html" class="btn btn-secondary">Browse Services</a>
+                    </div>
+                `;
+            } else {
+                cart.forEach(item => {
+                    html += `
+                        <div class="cart-item">
+                            <div class="item-info">
+                                <h4>${item.service}</h4>
+                                <p>${item.description || 'Professional service'}</p>
+                            </div>
+                            <div class="item-price">$${item.price}</div>
+                        </div>
+                    `;
+                    total += item.price;
+                });
+            }
+            
+            cartItems.innerHTML = html;
+            totalAmount.textContent = total.toFixed(2);
+        }
+
+        // Handle payment submission
+        // (Moved to DOMContentLoaded event above)
+
+        function showConfirmation(orderData) {
+            // Check if elements exist
+            const submitBtn = document.getElementById('submit-payment');
+            const cardPayment = document.getElementById('card-payment');
+            const paymentOptions = document.getElementById('payment-options');
+            const confirmationScreen = document.getElementById('payment-confirmation');
+            
+            if (!submitBtn || !cardPayment || !paymentOptions || !confirmationScreen) {
+                showNotification('Error: Missing form elements', 'error');
+                return;
+            }
+            
+            // Hide payment form
+            submitBtn.style.display = 'none';
+            cardPayment.style.display = 'none';
+            paymentOptions.style.display = 'none';
+            
+            // Show confirmation screen
+            confirmationScreen.style.display = 'block';
+            
+            // Populate customer info
+            const customerInfo = document.getElementById('confirmation-customer-info');
+            customerInfo.innerHTML = `
+                <div class="info-row">
+                    <span class="info-label">Name:</span>
+                    <span class="info-value">${orderData.customerName}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value">${orderData.customerEmail || 'Not provided'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Discord:</span>
+                    <span class="info-value">${orderData.customerDiscord}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Location:</span>
+                    <span class="info-value">${orderData.customerLocation || 'Not provided'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Project Details:</span>
+                    <span class="info-value">${orderData.customerDescription || 'No details provided'}</span>
+                </div>
+            `;
+            
+            // Populate order summary
+            const orderSummary = document.getElementById('confirmation-order-summary');
+            orderSummary.innerHTML = orderData.items.map(item => `
+                <div class="order-item-row">
+                    <span>${item.service}</span>
+                    <span>$${item.price.toFixed(2)}</span>
+                </div>
+            `).join('');
+            
+            // Update totals
+            const total = orderData.items.reduce((sum, item) => sum + item.price, 0);
+            document.getElementById('confirmation-total').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('confirm-total').textContent = total.toFixed(2);
+            
+            // Store order data for later use
+            window.currentOrder = orderData;
+        }
+
+        // Handle cancel purchase
+        // (Moved to DOMContentLoaded event above)
+
+        // Handle confirm purchase
+        // (Moved to DOMContentLoaded event above)
+
+        function showSuccess(orderData) {
+            document.getElementById('submit-payment').style.display = 'none';
+            document.getElementById('payment-loading').style.display = 'none';
+            document.getElementById('payment-success').style.display = 'block';
+            
+            // Populate success order details
+            const successDetails = document.getElementById('success-order-details');
+            successDetails.innerHTML = orderData.items.map(item => `
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
+                    <span>${item.service}</span>
+                    <span style="font-weight: 600; color: #667eea;">$${item.price.toFixed(2)}</span>
+                </div>
+            `).join('') + `
+                <div style="display: flex; justify-content: space-between; padding: 12px 0 0 0; font-weight: 700; font-size: 18px; color: #333;">
+                    <span>Total</span>
+                    <span style="color: #667eea;">$${orderData.items.reduce((sum, item) => sum + item.price, 0).toFixed(2)}</span>
+                </div>
+            `;
+            
+            // Clear cart
+            localStorage.removeItem('shoppingCart');
+        }
+
+        function sendOrderEmail(orderData) {
+            // Send email notification using EmailJS
+            emailjs.send('service_22m6rq4', 'template_6gkoxqo', {
+                type: 'payment',
+                name: orderData.customerName,
+                email: orderData.customerEmail,
+                details: orderData.description,
+                items: orderData.items.map(item => `${item.service} - $${item.price}`).join(', '),
+                total: orderData.items.reduce((sum, item) => sum + item.price, 0),
+                timestamp: new Date().toLocaleString()
+            }).then(function(response) {
+                // Email sent successfully
+            }, function(error) {
+                // Failed to send email
+            });
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCart();
+            
+            // Add payment method switching event listeners
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove active class from all options
+                    document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('active'));
+                    document.querySelectorAll('.payment-form').forEach(form => form.classList.remove('active'));
+                    
+                    // Add active class to selected option
+                    this.classList.add('active');
+                    
+                    // Show corresponding payment form
+                    const method = this.dataset.method;
+                    const paymentForm = document.getElementById(`${method}-payment`);
+                    if (paymentForm) {
+                        paymentForm.classList.add('active');
+                    }
+                });
+            });
+            
+            // Check if submit button exists before adding listener
+            const submitBtn = document.getElementById('submit-payment');
+            
+            if (submitBtn) {
+                // Add event listeners after DOM is ready
+                submitBtn.addEventListener('click', function() {
+                    const customerName = document.getElementById('customer-name').value;
+                    const customerEmail = document.getElementById('customer-email').value;
+                    const customerDiscord = document.getElementById('customer-discord').value;
+                    const customerLocation = document.getElementById('customer-location').value;
+                    const customerDescription = document.getElementById('customer-description').value;
+                    
+                    if (!customerName) {
+                        showNotification('Please enter your full name', 'error');
+                        return;
+                    }
+                    
+                    if (!customerDiscord) {
+                        showNotification('Please enter your Discord username', 'error');
+                        return;
+                    }
+                    
+                    const cart = JSON.parse(localStorage.getItem('shoppingCart') || '[]');
+                    
+                    if (cart.length === 0) {
+                        showNotification('Your cart is empty', 'error');
+                        return;
+                    }
+                    
+                    // Show confirmation screen
+                    showConfirmation({
+                        customerName,
+                        customerEmail,
+                        customerDiscord,
+                        customerLocation,
+                        customerDescription,
+                        items: cart
+                    });
+                });
+            }
+            
+            // Add cancel purchase event listener
+            document.getElementById('cancel-purchase').addEventListener('click', function() {
+                // Check if elements exist
+                const submitBtn = document.getElementById('submit-payment');
+                const cardPayment = document.getElementById('card-payment');
+                const paymentOptions = document.getElementById('payment-options');
+                const confirmationScreen = document.getElementById('payment-confirmation');
+                
+                if (!submitBtn || !cardPayment || !paymentOptions || !confirmationScreen) {
+                    return;
+                }
+                
+                // Hide confirmation screen
+                confirmationScreen.style.display = 'none';
+                
+                // Show payment form again
+                submitBtn.style.display = 'block';
+                cardPayment.style.display = 'block';
+                paymentOptions.style.display = 'block';
+            });
+            
+            // Add confirm purchase event listener
+            document.getElementById('confirm-purchase').addEventListener('click', async function() {
+                const orderData = window.currentOrder;
+                
+                if (!orderData) {
+                    showNotification('Error: No order data found', 'error');
+                    return;
+                }
+                
+                // Check if elements exist
+                const confirmationScreen = document.getElementById('payment-confirmation');
+                const loadingScreen = document.getElementById('payment-loading');
+                
+                if (!confirmationScreen || !loadingScreen) {
+                    showNotification('Error: Missing UI elements', 'error');
+                    return;
+                }
+                
+                // Show loading state
+                confirmationScreen.style.display = 'none';
+                
+                // Show confirm animation first
+                const confirmAnimation = document.getElementById('confirm-animation');
+                confirmAnimation.style.display = 'block';
+                
+                // Wait 2 seconds then show loading
+                setTimeout(() => {
+                    confirmAnimation.style.display = 'none';
+                    loadingScreen.style.display = 'block';
+                }, 2000);
+                
+                try {
+                    // Create payment intent on server
+                    const response = await fetch('/api/create-payment-intent', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            items: orderData.items,
+                            customerName: orderData.customerName,
+                            customerEmail: orderData.customerEmail,
+                            customerDiscord: orderData.customerDiscord,
+                            customerLocation: orderData.customerLocation,
+                            description: orderData.customerDescription
+                        }),
+                    });
+                    
+                    const { clientSecret } = await response.json();
+                    
+                    // Confirm payment with Stripe
+                    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+                        payment_method: {
+                            card: card,
+                            billing_details: {
+                                name: orderData.customerName,
+                                email: orderData.customerEmail,
+                            },
+                        },
+                    });
+                    
+                    if (error) {
+                        const cardErrors = document.getElementById('card-errors');
+                        if (cardErrors) {
+                            cardErrors.textContent = error.message;
+                        }
+                        
+                        // Reset UI state
+                        const loadingScreen = document.getElementById('payment-loading');
+                        const submitBtn = document.getElementById('submit-payment');
+                        const cardPayment = document.getElementById('card-payment');
+                        const paymentOptions = document.getElementById('payment-options');
+                        
+                        if (loadingScreen) loadingScreen.style.display = 'none';
+                        if (submitBtn) submitBtn.style.display = 'block';
+                        if (cardPayment) cardPayment.style.display = 'block';
+                        if (paymentOptions) paymentOptions.style.display = 'block';
+                    } else {
+                        // Payment successful
+                        showSuccess({
+                            customerName: orderData.customerName,
+                            customerEmail: orderData.customerEmail,
+                            description: orderData.customerDescription,
+                            items: orderData.items,
+                            paymentIntent: paymentIntent
+                        });
+                        
+                        // Send email notification
+                        sendOrderEmail({
+                            customerName: orderData.customerName,
+                            customerEmail: orderData.customerEmail,
+                            customerDiscord: orderData.customerDiscord,
+                            customerLocation: orderData.customerLocation,
+                            description: orderData.customerDescription,
+                            items: orderData.items,
+                            paymentIntent: paymentIntent
+                        });
+                    }
+                } catch (error) {
+                    showNotification('Payment failed. Please try again.', 'error');
+                    
+                    // Reset UI state
+                    const loadingScreen = document.getElementById('payment-loading');
+                    const submitBtn = document.getElementById('submit-payment');
+                    const cardPayment = document.getElementById('card-payment');
+                    const paymentOptions = document.getElementById('payment-options');
+                    
+                    if (loadingScreen) loadingScreen.style.display = 'none';
+                    if (submitBtn) submitBtn.style.display = 'block';
+                    if (cardPayment) cardPayment.style.display = 'block';
+                    if (paymentOptions) paymentOptions.style.display = 'block';
+                }
+            });
+        });
+    </script>
+
+    <style>
+        /* Modern Checkout Styles */
+        .checkout-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .order-card, .payment-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: white;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-content {
+            padding: 25px;
+        }
+
+        /* Cart Items */
+        .cart-items {
+            margin-bottom: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #e9ecef;
+        }
+
+        .item-info h4 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .item-info p {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .item-price {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-cart i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* Order Total */
+        .order-total {
+            border-top: 2px solid #e5e7eb;
+            padding-top: 20px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .total-amount {
+            color: #667eea;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+        }
+
+        /* Payment Options */
+        .payment-options {
+            margin-bottom: 30px;
+        }
+
+        .payment-option {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .payment-option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .payment-option.active {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .option-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f3f4f6;
+            border-radius: 8px;
+            margin-right: 15px;
+        }
+
+        .payment-option.active .option-icon {
+            background: #667eea;
+            color: white;
+        }
+
+        .option-content {
+            flex: 1;
+        }
+
+        .option-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .option-desc {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .option-check {
+            color: #d1d5db;
+            font-size: 20px;
+        }
+
+        .payment-option.active .option-check {
+            color: #10b981;
+        }
+
+        /* Payment Forms */
+        .payment-form {
+            display: none;
+            margin-bottom: 25px;
+        }
+
+        .payment-form.active {
+            display: block;
+        }
+
+        .stripe-card {
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .paypal-placeholder, .paysafecard-placeholder {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .paypal-placeholder i, .paysafecard-placeholder i {
+            margin-bottom: 15px;
+            opacity: 0.6;
+        }
+
+        /* Payment Button */
+        .payment-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .payment-btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-shine {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .payment-btn:hover .btn-shine {
+            left: 100%;
+        }
+
+        /* Confirm Animation State Styles */
+        .confirm-animation-state {
+            text-align: center;
+            padding: 60px 40px;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .confirm-animation-content {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .confirm-success-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            animation: confirmPulse 0.8s ease-out, confirmGlow 2s ease-in-out infinite;
+            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+            position: relative;
+            margin-bottom: 30px;
+        }
+        
+        .confirm-success-circle::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            animation: confirmRipple 2s ease-out infinite;
+            z-index: -1;
+        }
+        
+        .confirm-success-checkmark {
+            color: white;
+            font-size: 50px;
+            animation: confirmCheckmarkPop 0.8s ease-out 0.4s both;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .confirm-animation-content h3 {
+            color: #10b981;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            animation: slideInDown 0.8s ease-out 0.6s both;
+        }
+        
+        .confirm-animation-content p {
+            color: #6b7280;
+            font-size: 16px;
+            animation: slideInDown 0.8s ease-out 0.8s both;
+        }
+        
+        @keyframes confirmPulse {
+            0% { 
+                transform: scale(0); 
+                opacity: 0; 
+            }
+            50% { 
+                transform: scale(1.1); 
+                opacity: 1;
+            }
+            100% { 
+                transform: scale(1); 
+                opacity: 1; 
+            }
+        }
+        
+        @keyframes confirmGlow {
+            0%, 100% { 
+                box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4); 
+            }
+            50% { 
+                box-shadow: 0 8px 40px rgba(16, 185, 129, 0.6); 
+            }
+        }
+        
+        @keyframes confirmRipple {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes confirmCheckmarkPop {
+            0% { 
+                transform: scale(0) rotate(-45deg); 
+                opacity: 0;
+            }
+            50% { 
+                transform: scale(1.3) rotate(10deg); 
+                opacity: 1;
+            }
+            100% { 
+                transform: scale(1) rotate(0deg); 
+                opacity: 1;
+            }
+        }
+
+        /* Loading & Confirmation State Styles */
+        .confirmation-state {
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .confirmation-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .confirmation-header h3 {
+            color: #374151;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .confirmation-header p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        .confirmation-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .confirmation-section {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .confirmation-section h4 {
+            color: #374151;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .confirmation-section h4 i {
+            color: #667eea;
+        }
+        
+        #confirmation-customer-info {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 500;
+            color: #6b7280;
+        }
+        
+        .info-value {
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        #confirmation-order-summary {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .order-item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .order-item-row:last-child {
+            border-bottom: none;
+        }
+        
+        .payment-method-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .payment-method-display i {
+            color: #667eea;
+            font-size: 20px;
+        }
+        
+        .payment-method-display span {
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .card-preview {
+            margin-left: auto;
+            color: #6b7280;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .confirmation-total {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            color: white;
+        }
+        
+        .confirmation-total .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .confirmation-total .total-amount {
+            font-size: 24px;
+        }
+        
+        .confirmation-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: space-between;
+        }
+        
+        .btn {
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            flex: 1;
+        }
+        
+        .btn-outline {
+            background: white;
+            color: #6b7280;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .btn-outline:hover {
+            border-color: #667eea;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Success State Styles */
+        .loading-state, .success-state {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        .success-icon {
+            font-size: 64px;
+            color: #10b981;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            .checkout-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .checkout-container {
+                margin: 20px auto;
+            }
+        }
+
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+    /* Terms and Conditions */
+        .terms-checkbox {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .terms-checkbox input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .terms-checkbox label {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .terms-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 3px;
+        }
+
+        .terms-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Terms Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            background: white;
+            margin: 50px auto;
+            padding: 0;
+            border-radius: 12px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+        }
+
+        .modal-body {
+            padding: 20px 25px;
+        }
+
+        .modal-body h4 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .modal-body p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .modal-body ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .modal-body li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            color: #555;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            text-align: right;
+            border-top: 1px solid #eee;
+        }
+    </style>
+<script>
+        // Anti-debugging protection
+        (function() {
+            var _0x1a2b = function() {
+                var _0x3c4d = ['debugger', 'devtools', 'console', 'log', 'warn', 'error'];
+                for (var i = 0; i < _0x3c4d.length; i++) {
+                    if (window[_0x3c4d[i]]) {
+                        window[_0x3c4d[i]] = function() {};
+                    }
+                }
+                
+                // Detect devtools
+                var devtools = /./;
+                devtools.toString = function() {
+                    this.open = function() {
+                        window.location.href = 'about:blank';
+                    };
+                    return '';
+                };
+                
+                setInterval(function() {
+                    devtools.toString();
+                }, 1000);
+            };
+            
+            if (window.location.protocol !== 'file:') {
+                _0x1a2b();
+            }
+        })();
+        
+        // Disable right click and F12
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Terms and Conditions Modal
+        function closeTermsModal() {
+            document.getElementById('terms-modal').style.display = 'none';
+        }
+
+        // Handle terms link clicks
+        document.addEventListener('DOMContentLoaded', function() {
+            const termsLinks = document.querySelectorAll('.terms-link');
+            termsLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.getElementById('terms-modal').style.display = 'block';
+                });
+            });
+
+            // Close modal when clicking outside
+            const modal = document.getElementById('terms-modal');
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeTermsModal();
+                }
+            });
+
+            // Validate terms checkbox before payment
+            const submitBtn = document.getElementById('submit-payment');
+            const termsCheckbox = document.getElementById('terms-accept');
+            
+            submitBtn.addEventListener('click', function(e) {
+                if (!termsCheckbox.checked) {
+                    e.preventDefault();
+                    alert('Please accept the Terms of Service to continue');
+                    termsCheckbox.focus();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
